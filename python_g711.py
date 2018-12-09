@@ -10,7 +10,7 @@ void  ulaw_compress (long lseg, short *linbuf, short *logbuf);
 void  ulaw_expand (long lseg, short *logbuf, short *linbuf);
 """)
 
-ffibuilder.set_source("""
+ffibuilder.set_source('_g711',"""
 /*                                                 Version 3.01 - 31.Jan.2000
 =============================================================================
 
@@ -85,7 +85,7 @@ Apr/91       1.0   First version of the G711 module
  */
 
 /* Global prototype functions */
-#include "g711.h"
+/* #include "g711.h" */
 
 /*
  *	.......... F U N C T I O N S ..........
