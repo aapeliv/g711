@@ -14,12 +14,13 @@ void  ulaw_expand (long lseg, short *logbuf, short *linbuf);
 
 INCLUDE_DIRS = ('.',)
 
-SOURCES = ('g711.c',)
+SOURCES = ('g711.c', 'decode.c')
 
 ffibuilder.set_source(
     '_g711',
     """
     #include "g711.h"
+    #include "decode.h"
     """,
     include_dirs=INCLUDE_DIRS,
     sources=SOURCES

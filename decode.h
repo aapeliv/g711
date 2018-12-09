@@ -1,0 +1,1 @@
+void decode(long length, char *in_buf, short *out_buf);
