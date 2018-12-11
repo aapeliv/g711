@@ -8,14 +8,29 @@ from cffi import FFI
 ffi = FFI()
 
 
-class Error(Exception):
-    pass
-
-
 def _apply(bytes_in, func, encode):
+    """
+    Transforms bytes_in into a C buffer of the right type and applies func to it,
+    encode is either True for encoding or False for decoding, and changes the 
+    underlying C buffer types.
+
+    :param bytes_in: Python bytes object containing the data to be encoded or decoded
+    :param func: one of _alaw_encode, _alaw_decode, _ulaw_encode, or _ulaw_decode to 
+        apply to the bytes
+    :param encode: binary flag of whether we're encoding or decoding
+    :returns: bytes containing the encoded or decoded samples
+    :raises ValueError: the number of bytes supplied was not a multiple of two when
+        encoding
+    """
     if encode and len(bytes_in) % 2 != 0:
-        raise Error("Number of bytes to be encoded must be even as each sample requires two bytes")
+        raise ValueError("Number of bytes to be encoded must be even as each sample requires two bytes")
     div = 2 if encode else 1
+
+    # If we encode, we take 16-bit PCM samples (although we only use either 13 or 14
+    # bits of them) and transform them into 8-bit G.711 encoded samples.
+    # In the other direction, we take 8-bit G.711 encoded samples and transform them
+    # into 16-bit PCM samples. However, Python bytes are always 8-bits each, so need
+    # to divide by 2 if we're encoding (as each sample takes 2 bytes).
     in_buf = ffi.new("int16_t[]" if encode else "int8_t[]", len(bytes_in) // div)
     ot_buf = ffi.new("int8_t[]" if encode else "int16_t[]", len(bytes_in) // div)
 
@@ -43,8 +58,8 @@ class g711_read:
             file = builtins.open(file, 'rb')
             self._opened = True
         self.file = file
-        if law != 'alaw' and law != 'ulaw':
-            raise Error("Law must be either ulaw or alaw")
+        if law not in ('alaw', 'ulaw'):
+            raise ValueError("Law must be either ulaw or alaw")
         self.law = law
 
     def readsamples(self, number=None):
@@ -74,8 +89,8 @@ class g711_write:
             file = builtins.open(f, 'wb')
             self._opened = True
         self.file = file
-        if law != 'ulaw' and law != 'alaw':
-            raise Error("Law must be either ulaw or alaw")
+        if law not in ('alaw', 'ulaw'):
+            raise ValueError("Law must be either ulaw or alaw")
         self.law = law
 
     def writesamples(self, samples):
@@ -104,4 +119,4 @@ def open(filename, mode, law):
     elif mode in ('w', 'wb', 'w+b'):
         return g711_write(filename, law)
     else:
-        raise Error("Invalid mode, expecting one of 'r', 'rb', 'r+b', 'w', 'wb', and 'w+b'.")
+        raise ValueError("Invalid mode '{}', expecting one of 'r', 'rb', 'r+b', 'w', 'wb', and 'w+b'.".format(mode))
