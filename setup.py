@@ -6,8 +6,8 @@ with open("readme.md", "r") as fh:
 setup(
     name = "g711",
     version="0.0.1",
-    author="Aapeli Vuorinen",
-    author_email="python@aapelivuorinen.com",
+    author="Custom Programming Solutions Pty Ltd",
+    author_email="opensource@customprogrammingsolutions.com",
     description="A G.711 encoding and decoding tool.",
     long_description=long_description,
     long_description_content_type="text/markdown",
